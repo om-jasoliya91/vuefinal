@@ -54,6 +54,12 @@ export const useUserStore = defineStore('userStore', () => {
       })
     }
   }
+  async function addStudent(formData) {
+    const data = await axios.post('api/createUser', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    console.log('Request data:', data)
+  }
 
   const logout = async () => {
     try {
@@ -73,5 +79,6 @@ export const useUserStore = defineStore('userStore', () => {
     register,
     logout,
     loginUser,
+    addStudent,
   }
 })
