@@ -34,7 +34,7 @@ const submitLogin = handleSubmit(async () => {
 
   if (result.success) {
     resetForm()
-    router.push('/home') // redirect after login
+    router.push('/home')
   } else {
     alert(result.error?.message ?? 'Invalid credentials!')
   }
