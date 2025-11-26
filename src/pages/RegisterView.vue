@@ -29,7 +29,7 @@ const { value: password, errorMessage: passwordError } = useField('password')
 const submitForm = handleSubmit(async () => {
   const formData = new FormData()
 
-  formData.append('name', name.value)
+  formData.append('firstname', name.value)
   formData.append('email', email.value)
   formData.append('password', password.value)
 

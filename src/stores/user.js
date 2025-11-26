@@ -18,6 +18,7 @@ axios.interceptors.request.use((config) => {
 export const useUserStore = defineStore('userStore', () => {
   const user = ref()
   const token = ref()
+  const users = ref([])
   // REGISTER
   const register = async (formData) => {
     try {
@@ -61,6 +62,14 @@ export const useUserStore = defineStore('userStore', () => {
     console.log('Request data:', data)
   }
 
+  const getStudents = async () => {
+    try {
+      const res = await axios.get('api/getUsers')
+      users.value = res.data.users
+    } catch (e) {
+      console.log('Students not get', e)
+    }
+  }
   const logout = async () => {
     try {
       await axios.post('api/logout') // token automatically added by interceptor
@@ -80,5 +89,6 @@ export const useUserStore = defineStore('userStore', () => {
     logout,
     loginUser,
     addStudent,
+    getStudents,
   }
 })

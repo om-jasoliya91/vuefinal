@@ -3,6 +3,8 @@ import * as yup from 'yup'
 import { useRouter } from 'vue-router'
 import { useForm, useField } from 'vee-validate'
 import { useUserStore } from '@/stores/user'
+import Swal from 'sweetalert2'
+import HeaderVue from '@/components/layouts/HeaderVue.vue'
 
 const router = useRouter()
 const auth = useUserStore()
@@ -59,11 +61,20 @@ const submitForm = handleSubmit(async () => {
   await auth.addStudent(formData)
 
   resetForm()
+  Swal.fire({
+    title: 'Add User Successfully',
+    icon: 'success',
+    timer: 2000,
+    toast: true,
+    position: "top-end",
+    showConfirmButton: false,
+  })
   router.push('/home')
 })
 </script>
 
 <template>
+  <HeaderVue />
   <div class="container my-5" style="width: 600px">
     <h1 class="text-primary text-center">Add User</h1>
 
