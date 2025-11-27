@@ -8,11 +8,14 @@ const auth = useUserStore()
 onMounted(() => {
   auth.getStudents()
 })
+async function handleDelete(id) {
+  await auth.deleteStudent(id)
+}
 </script>
 
 <template>
   <HeaderVue></HeaderVue>
   <!-- @edit="handleEdit" @delete="handleDelete" -->
-  <UserDatatable :users="auth.users"></UserDatatable>
+  <UserDatatable :users="auth.users" @delete="handleDelete"></UserDatatable>
 </template>
 <style scoped></style>

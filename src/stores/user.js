@@ -66,6 +66,67 @@ export const useUserStore = defineStore('userStore', () => {
     const res = await axios.get('api/getUsers')
     users.value = res.data.users
   }
+  const deleteStudent = async (id) => {
+    Swal.fire({
+      title: 'Are You Sure You Want To Delete This Student?',
+      text: 'This action cannot be undone.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel',
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const res = await axios.post(`/api/delete/${id}`)
+          console.log(res)
+          getStudents()
+
+          Swal.fire({
+            title: 'User Deleted successfully',
+            icon: 'success',
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+          })
+        } catch {
+          Swal.fire({
+            title: 'Error!',
+            text: 'There was a problem deleting the student.',
+            icon: 'error',
+            position: 'top-end',
+            toast: true,
+          })
+        }
+      }
+    })
+  }
+
+  const updateStudent = async (id, formData) => {
+    try {
+      const res = await axios.post(`api/update/${id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+
+      if (res.data.message === 'Profile updated successfully') {
+        Swal.fire({
+          title: 'Profile Updated Successfully',
+          icon: 'success',
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false,
+          timer: 3000,
+        })
+        getStudents() // Refresh the list of students if needed
+      }
+    } catch (error) {
+      Swal.fire({
+        title: 'Update Failed',
+        text: error.response?.data?.message || 'There was an error updating the profile.',
+        icon: 'error',
+      })
+    }
+  }
   const logout = async () => {
     try {
       await axios.post('api/logout') // token automatically added by interceptor
@@ -87,5 +148,7 @@ export const useUserStore = defineStore('userStore', () => {
     loginUser,
     addStudent,
     getStudents,
+    deleteStudent,
+    updateStudent,
   }
 })
