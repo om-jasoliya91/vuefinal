@@ -42,7 +42,7 @@ export const useUserStore = defineStore('userStore', () => {
         showConfirmButton: false,
       })
       token.value = res.data.token
-      user.value = res.data.user
+      user.value = res.data.data
 
       localStorage.setItem('token', res.data.token)
 
@@ -63,12 +63,8 @@ export const useUserStore = defineStore('userStore', () => {
   }
 
   const getStudents = async () => {
-    try {
-      const res = await axios.get('api/getUsers')
-      users.value = res.data.users
-    } catch (e) {
-      console.log('Students not get', e)
-    }
+    const res = await axios.get('api/getUsers')
+    users.value = res.data.users
   }
   const logout = async () => {
     try {
@@ -85,6 +81,7 @@ export const useUserStore = defineStore('userStore', () => {
   return {
     user,
     token,
+    users,
     register,
     logout,
     loginUser,
