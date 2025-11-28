@@ -1,7 +1,8 @@
 <template>
-  <nav class="navbar navbar-expand-lg bg-dark">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
-      <a class="navbar-brand text-white" href="#">Navbar</a>
+      <router-link to="/home" class="navbar-brand">Navbar</router-link>
+
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -9,28 +10,28 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <router-link to="/home" class="nav-link active text-white">Home</router-link>
+            <router-link to="/home" class="nav-link text-white">Home</router-link>
           </li>
           <li class="nav-item">
-            <router-link to="/adduser" class="nav-link active text-white">Add User</router-link>
+            <router-link to="/adduser" class="nav-link text-white">Add User</router-link>
           </li>
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown"
-              aria-expanded="false">
-              Dropdown
+            <a class="nav-link dropdown-toggle text-white" href="#" id="settingsDropdown" role="button"
+              data-bs-toggle="dropdown" aria-expanded="false">
+              Settings
             </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" @click="handleLogout">Logout</a></li>
+            <ul class="dropdown-menu" aria-labelledby="settingsDropdown">
               <li>
-                <hr class="dropdown-divider" />
+                <a class="dropdown-item" @click="handleLogout">Logout</a>
               </li>
-              <li><a class="dropdown-item t" href="#">Another action</a></li>
             </ul>
           </li>
         </ul>
-        <form class="d-flex" role="search">
+        <form class="d-flex mt-2 mt-lg-0" role="search">
           <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
-          <button class="btn btn-outline-success" type="submit">Search</button>
+          <button class="btn btn-outline-success" type="submit">
+            Search
+          </button>
         </form>
       </div>
     </div>
@@ -40,16 +41,17 @@
 import { useUserStore } from '@/stores/user'
 import Swal from 'sweetalert2'
 import { useRouter } from 'vue-router'
+
 const auth = useUserStore()
 const router = useRouter()
 
 function handleLogout() {
   Swal.fire({
-    title: 'Are You Sure You Want To Logout',
-    text: 'You will need to login again to access your account',
+    title: 'Are You Sure You Want To Logout?',
+    text: 'You will need to login again to access your account.',
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonText: 'Yes,Logout',
+    confirmButtonText: 'Yes, Logout',
     cancelButtonText: 'Cancel',
   }).then(async (result) => {
     if (result.isConfirmed) {

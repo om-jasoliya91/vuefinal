@@ -33,13 +33,14 @@ const submitForm = handleSubmit(async () => {
   formData.append('password', password.value)
 
   const res = await auth.register(formData)
+
   if (!res.success) {
     Swal.fire({
       icon: 'error',
-      title: res.error?.message || 'Registration Failed!',
+      title: 'Registration Failed!',
       timer: 2000,
-      position: 'top-end',
       toast: true,
+      position: 'top-end',
       showConfirmButton: false,
     })
     return
@@ -47,10 +48,10 @@ const submitForm = handleSubmit(async () => {
 
   Swal.fire({
     icon: 'success',
-    title: res.data.message || 'Registered Successfully!',
-    timer: 2000,
-    position: 'top-end',
+    title: 'Registered Successfully!',
+    timer: 1500,
     toast: true,
+    position: 'top-end',
     showConfirmButton: false,
   })
 
@@ -65,7 +66,7 @@ const submitForm = handleSubmit(async () => {
 
     <form @submit.prevent="submitForm">
       <div class="mb-2">
-        <label>First Name</label>
+        <label>Name</label>
         <input v-model="name" class="form-control" type="text" />
         <small class="text-danger">{{ nameError }}</small>
       </div>
@@ -83,6 +84,7 @@ const submitForm = handleSubmit(async () => {
       </div>
 
       <button class="btn btn-primary w-100">Register</button>
+
       <div class="text-center mt-2">
         <router-link to="/login">Already have an account?</router-link>
       </div>

@@ -10,8 +10,8 @@ export const useUserStore = defineStore('userStore', () => {
 
   const register = async (formData) => {
     try {
-      const res = await axios.post('api/register', formData)
-      return { success: true, data: res.data }
+      const res = await axios.post('api/register', formData, {})
+      return { success: true, data: res.data.data }
     } catch (error) {
       return {
         success: false,
@@ -38,6 +38,8 @@ export const useUserStore = defineStore('userStore', () => {
     } catch (error) {
       Swal.fire({
         title: 'Login Faild',
+        toast: true,
+        position: 'top-end',
         text: error.response?.data?.message || 'Please Check Your Credentials',
         icon: 'error',
       })
@@ -112,7 +114,7 @@ export const useUserStore = defineStore('userStore', () => {
       const { data } = await axios.post(`api/update/${id}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
-
+      console.log(data)
       Swal.fire({
         title: 'Updated Successfully!',
         icon: 'success',
@@ -121,16 +123,14 @@ export const useUserStore = defineStore('userStore', () => {
         showConfirmButton: false,
         timer: 2000,
       })
-      await getStudents()
       const index = users.value.findIndex((u) => u.id == id)
       if (index !== -1) {
-        data.user.profile = `${data.user.profile}?t=${Date.now()}`
+        data.user.profile = `${data.user.profile}`
 
         users.value[index] = {
           ...users.value[index],
           ...data.user,
         }
-
         localStorage.setItem('users', JSON.stringify(users.value))
       }
 

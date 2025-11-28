@@ -30,7 +30,7 @@ function deleteStudent(id) {
         <RouterLink to="/adduser" class="text-center text-white">Add User</RouterLink>
       </button>
     </div>
-    <table border="1" class="table table-bordered table-striped-columns">
+    <table border="1" class="table table-bordered table-striped-columns table-responsive">
       <thead>
         <tr>
           <th>Id</th>
@@ -48,11 +48,9 @@ function deleteStudent(id) {
         <tr v-for="student in props.users" :key="student.id">
           <td>{{ student.id }}</td>
           <td>
-            <!-- <img v-if="student.profile" :src="`${path}/storage/${student.profile}`"  alt="Student profile" /> -->
-            <!-- <img v-if="student.profile" :src="`${path}/storage/${student.profile}`" :key="student.profile" width="80"
-              alt="profile" /> -->
-            <img v-if="student.profile" :src="`${path}/storage/${student.profile}`"
-              :key="`${path}/storage/${student.profile}`" width=" 80" alt="Profile" />
+            <img v-if="student.profile" :src="student.profile.startsWith('http')
+              ? student.profile
+              : `${path}/storage/${student.profile}`" alt="Student profile" />
 
           </td>
           <td>{{ student.firstname }}</td>

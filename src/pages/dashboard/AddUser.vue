@@ -23,7 +23,12 @@ const schema = yup.object({
       'filesize',
       'File too large (max 2MB)',
       (value) => !value || value.size <= 2 * 1024 * 1024,
-    ),
+    )
+    .test('fileType', 'Unsupported File system', (value) => {
+      const AllowedType = ['image/png', 'image/jpeg', 'image/jpg'];
+
+      return !value || AllowedType.includes(value.type)
+    }),
   email: yup.string().email('email is invalid').required('email is required'),
   password: yup.string().min(6).required('password is required'),
 })
@@ -31,13 +36,16 @@ const schema = yup.object({
 // vee-validate helper
 const { handleSubmit, resetForm } = useForm({
   validationSchema: schema,
+  initialValues: {
+    gender: 'male'
+  }
 })
 
 // defined fields
 const { value: firstname, errorMessage: firstnameError } = useField('firstname')
 const { value: lastname, errorMessage: lastnameError } = useField('lastname')
 const { value: dob, errorMessage: dobError } = useField('dob')
-const { value: gender, errorMessage: genderError } = useField('gender')
+const { value: gender, errorMessage: genderError } = useField('gender', 'male')
 const { value: phone, errorMessage: phoneError } = useField('phone')
 const { value: profile, errorMessage: profileError } = useField('profile')
 const { value: email, errorMessage: emailError } = useField('email')
@@ -96,11 +104,13 @@ const submitForm = handleSubmit(async () => {
         <input class="form-control" type="date" name="dob" placeholder="Select Your bithdate" v-model="dob" />
         <span class="text-danger">{{ dobError }}</span>
       </div>
-      <div class="mb-5">
-        <label>Gender:</label> <br />
+      <div class="mb-3">
+        <label>Gender:</label>
+        <br>
         <!-- Use v-model for radio buttons -->
-        Male:<input type="radio" name="gender" value="male" v-model="gender" /> Female:<input type="radio" name="gender"
-          value="female" v-model="gender" />
+        <input type="radio" name="gender" value="male" v-model="gender" /> Male
+        <br>
+        <input type="radio" name="gender" value="female" v-model="gender" /> Female
         <span class="text-danger">{{ genderError }}</span>
       </div>
       <div class="mb-3">
@@ -108,12 +118,7 @@ const submitForm = handleSubmit(async () => {
         <input class="form-control" type="number" name="phone" placeholder="Enter yout Mobile no" v-model="phone" />
         <span class="text-danger">{{ phoneError }}</span>
       </div>
-      <div class="mb-3">
-        <label>Profile:</label>
-        <!-- Use @change event listener for file inputs -->
-        <input class="form-control" type="file" name="profile" @change="handleFileChange" />
-        <span class="text-danger">{{ profileError }}</span>
-      </div>
+
       <div class="mb-3">
         <label>Email:</label>
         <input class="form-control" type="email" name="email" placeholder="Enter Your email" v-model="email" />
@@ -126,7 +131,14 @@ const submitForm = handleSubmit(async () => {
         <span class="text-danger">{{ passwordError }}</span>
       </div>
       <div class="mb-3">
-        <!-- The button type should be submit to trigger the form submission -->
+        <label>Profile Image:</label>
+        <!-- Use @change event listener for file inputs -->
+        <input class="form-control" type="file" name="profile" @change="handleFileChange"
+          accept="image/png, image/jpeg, image/jpg" />
+        <span class="text-danger">{{ profileError }}</span>
+      </div>
+      <div class="mb-3">
+
         <input class="form-control btn btn-primary" type="submit" value="AddUser" />
       </div>
     </form>
