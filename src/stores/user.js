@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import axios from 'axios'
 import { ref } from 'vue'
 import Swal from 'sweetalert2'
-
+axios.defaults.baseURL = import.meta.env.VITE_API_URL
 export const useUserStore = defineStore('userStore', () => {
   const user = ref()
   const token = ref()
@@ -105,43 +105,45 @@ export const useUserStore = defineStore('userStore', () => {
       }
     })
   }
-
   const updateStudent = async (id, formData) => {
     try {
       formData.append('_method', 'PUT')
-      const res = await axios.post(`api/update/${id}`, formData, {
+
+      const { data } = await axios.post(`api/update/${id}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
 
       Swal.fire({
-        title: 'Profile Updated Successfully',
+        title: 'Updated Successfully!',
         icon: 'success',
         toast: true,
         position: 'top-end',
         showConfirmButton: false,
         timer: 2000,
       })
-      const updatedUser = res.data.user
-      const index = users.value.findIndex((u) => u.id === id)
+      await getStudents()
+      const index = users.value.findIndex((u) => u.id == id)
       if (index !== -1) {
-        updatedUser.profile = `${updatedUser.profile}?t=${Date.now()}`
-        users.value[index] = { ...updatedUser }
+        data.user.profile = `${data.user.profile}?t=${Date.now()}`
+
+        users.value[index] = {
+          ...users.value[index],
+          ...data.user,
+        }
+
         localStorage.setItem('users', JSON.stringify(users.value))
       }
-      return { success: true, data: updatedUser }
+
+      return { success: true, data: data.user }
     } catch (error) {
       Swal.fire({
         title: 'Update Failed',
-        text: error.response?.data?.message || 'There was an error updating the profile.',
+        text: error.response?.data?.message || 'Something went wrong!',
         icon: 'error',
       })
-      return {
-        success: false,
-        error: error.response?.data,
-      }
+      return { success: false }
     }
   }
-
   const logout = async () => {
     try {
       await axios.post('api/logout') // token automatically added by interceptor
