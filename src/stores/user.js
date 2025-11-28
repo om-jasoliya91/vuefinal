@@ -3,23 +3,11 @@ import axios from 'axios'
 import { ref } from 'vue'
 import Swal from 'sweetalert2'
 
-// ------------------ GLOBAL AXIOS SETTINGS ------------------
-axios.defaults.baseURL = import.meta.env.VITE_API_URL
-
-// This adds Authorization Bearer token automatically on every request
-axios.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
-  return config
-})
-
 export const useUserStore = defineStore('userStore', () => {
   const user = ref()
   const token = ref()
   const users = ref([])
-  // REGISTER
+
   const register = async (formData) => {
     try {
       const res = await axios.post('api/register', formData)
@@ -63,8 +51,19 @@ export const useUserStore = defineStore('userStore', () => {
   }
 
   const getStudents = async () => {
+    if (users.value && users.value.length > 0) {
+      const storedUser = localStorage.getItem('users', JSON.stringify(users.value))
+      if (storedUser) {
+        users.value = JSON.parse(storedUser)
+      }
+      return
+    }
+    if (users.value.length > 0) {
+      return
+    }
     const res = await axios.get('api/getUsers')
     users.value = res.data.users
+    localStorage.setItem('users', JSON.stringify(users.value))
   }
   const deleteStudent = async (id) => {
     Swal.fire({
@@ -77,8 +76,13 @@ export const useUserStore = defineStore('userStore', () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const res = await axios.post(`/api/delete/${id}`)
+          const res = await axios.delete(`/api/delete/${id}`)
           console.log(res)
+          const index = users.value.findIndex((u) => u.id === u)
+          if (index !== 1) {
+            users.value.splice(index, 1)
+            localStorage.setItem('users', JSON.stringify(users.value))
+          }
           getStudents()
 
           Swal.fire({
@@ -104,29 +108,40 @@ export const useUserStore = defineStore('userStore', () => {
 
   const updateStudent = async (id, formData) => {
     try {
+      formData.append('_method', 'PUT')
       const res = await axios.post(`api/update/${id}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
 
-      if (res.data.message === 'Profile updated successfully') {
-        Swal.fire({
-          title: 'Profile Updated Successfully',
-          icon: 'success',
-          toast: true,
-          position: 'top-end',
-          showConfirmButton: false,
-          timer: 3000,
-        })
-        getStudents() // Refresh the list of students if needed
+      Swal.fire({
+        title: 'Profile Updated Successfully',
+        icon: 'success',
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 2000,
+      })
+      const updatedUser = res.data.user
+      const index = users.value.findIndex((u) => u.id === id)
+      if (index !== -1) {
+        updatedUser.profile = `${updatedUser.profile}?t=${Date.now()}`
+        users.value[index] = { ...updatedUser }
+        localStorage.setItem('users', JSON.stringify(users.value))
       }
+      return { success: true, data: updatedUser }
     } catch (error) {
       Swal.fire({
         title: 'Update Failed',
         text: error.response?.data?.message || 'There was an error updating the profile.',
         icon: 'error',
       })
+      return {
+        success: false,
+        error: error.response?.data,
+      }
     }
   }
+
   const logout = async () => {
     try {
       await axios.post('api/logout') // token automatically added by interceptor

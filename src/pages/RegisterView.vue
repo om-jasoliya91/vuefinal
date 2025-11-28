@@ -15,7 +15,7 @@ const schema = yup.object({
   password: yup.string().min(6, 'Min 6 characters').required('Password is required'),
 })
 
-// Vee Validate helper
+// Vee Validate
 const { handleSubmit, resetForm } = useForm({
   validationSchema: schema,
 })
@@ -25,19 +25,29 @@ const { value: name, errorMessage: nameError } = useField('name')
 const { value: email, errorMessage: emailError } = useField('email')
 const { value: password, errorMessage: passwordError } = useField('password')
 
-// Submit form
+// Submit Form
 const submitForm = handleSubmit(async () => {
   const formData = new FormData()
-
-  formData.append('firstname', name.value)
+  formData.append('name', name.value)
   formData.append('email', email.value)
   formData.append('password', password.value)
 
-  await auth.register(formData)
+  const res = await auth.register(formData)
+  if (!res.success) {
+    Swal.fire({
+      icon: 'error',
+      title: res.error?.message || 'Registration Failed!',
+      timer: 2000,
+      position: 'top-end',
+      toast: true,
+      showConfirmButton: false,
+    })
+    return
+  }
 
   Swal.fire({
     icon: 'success',
-    title: 'Registered Successfully!',
+    title: res.data.message || 'Registered Successfully!',
     timer: 2000,
     position: 'top-end',
     toast: true,

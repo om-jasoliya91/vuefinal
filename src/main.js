@@ -4,7 +4,7 @@ import axios from 'axios'
 
 import App from './App.vue'
 import router from './router'
-
+import './plugins/axios'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 const app = createApp(App)

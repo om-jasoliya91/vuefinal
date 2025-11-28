@@ -48,7 +48,12 @@ function deleteStudent(id) {
         <tr v-for="student in props.users" :key="student.id">
           <td>{{ student.id }}</td>
           <td>
-            <img v-if="student.profile" :src="`${path}/storage/${student.profile}`" alt="Student profile" />
+            <!-- <img v-if="student.profile" :src="`${path}/storage/${student.profile}`"  alt="Student profile" /> -->
+            <!-- <img v-if="student.profile" :src="`${path}/storage/${student.profile}`" :key="student.profile" width="80"
+              alt="profile" /> -->
+            <img v-if="student.profile" :src="`${path}/storage/${student.profile}`"
+              :key="`${path}/storage/${student.profile}`" width=" 80" alt="Profile" />
+
           </td>
           <td>{{ student.firstname }}</td>
           <td>{{ student.lastname }}</td>
