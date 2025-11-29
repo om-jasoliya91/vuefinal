@@ -15,33 +15,29 @@ const schema = yup.object({
   dob: yup.string().required('date of birth required'),
   gender: yup.string().required('Gender is required'),
   phone: yup.string().max(10).required('Mobile no is required'),
-  // profile: yup.mixed().required('Profile image is required'),
-  profile_pic: yup
+  profile: yup
     .mixed()
-    .test('required', 'File is required', (value) => value !== null)
-    .test(
-      'filesize',
-      'File too large (max 2MB)',
-      (value) => !value || value.size <= 2 * 1024 * 1024,
-    )
-    .test('fileType', 'Unsupported File system', (value) => {
-      const AllowedType = ['image/png', 'image/jpeg', 'image/jpg'];
-
-      return !value || AllowedType.includes(value.type)
+    .required('File is required')
+    .test('fileType', 'Only PNG, JPG, JPEG allowed', (value) => {
+      if (!value) return true
+      const allowed = ['image/png', 'image/jpeg', 'image/jpg']
+      return allowed.includes(value.type)
+    })
+    .test('fileSize', 'Max size 2MB allowed', (value) => {
+      if (!value) return true
+      return value.size <= 2 * 1024 * 1024
     }),
   email: yup.string().email('email is invalid').required('email is required'),
   password: yup.string().min(6).required('password is required'),
 })
 
-// vee-validate helper
-const { handleSubmit, resetForm } = useForm({
+const { handleSubmit, resetForm, setFieldError } = useForm({
   validationSchema: schema,
   initialValues: {
-    gender: 'male'
-  }
+    gender: 'male',
+  },
 })
 
-// defined fields
 const { value: firstname, errorMessage: firstnameError } = useField('firstname')
 const { value: lastname, errorMessage: lastnameError } = useField('lastname')
 const { value: dob, errorMessage: dobError } = useField('dob')
@@ -51,10 +47,18 @@ const { value: profile, errorMessage: profileError } = useField('profile')
 const { value: email, errorMessage: emailError } = useField('email')
 const { value: password, errorMessage: passwordError } = useField('password')
 
-function handleFileChange(event) {
-  profile.value = event.target.files[0]
-}
+async function handleFileChange(event) {
+  const file = event.target.files[0]
+  profile.value = file
 
+  try {
+    await schema.validateAt('profile', { profile: file })
+    setFieldError('profile', undefined)
+  } catch (err) {
+    setFieldError('profile', err.message)
+    event.target.value = ''
+  }
+}
 const submitForm = handleSubmit(async () => {
   const formData = new FormData()
   formData.append('firstname', firstname.value)
@@ -67,14 +71,13 @@ const submitForm = handleSubmit(async () => {
   formData.append('password', password.value)
 
   await auth.addStudent(formData)
-
   resetForm()
   Swal.fire({
     title: 'Add User Successfully',
     icon: 'success',
     timer: 2000,
     toast: true,
-    position: "top-end",
+    position: 'top-end',
     showConfirmButton: false,
   })
   router.push('/home')
@@ -85,7 +88,6 @@ const submitForm = handleSubmit(async () => {
   <HeaderVue />
   <div class="container my-5" style="width: 600px">
     <h1 class="text-primary text-center">Add User</h1>
-
     <form @submit.prevent="submitForm">
       <div class="mb-3">
         <label>First Name:</label>
@@ -107,7 +109,6 @@ const submitForm = handleSubmit(async () => {
       <div class="mb-3">
         <label>Gender:</label>
         <br>
-        <!-- Use v-model for radio buttons -->
         <input type="radio" name="gender" value="male" v-model="gender" /> Male
         <br>
         <input type="radio" name="gender" value="female" v-model="gender" /> Female
@@ -118,7 +119,6 @@ const submitForm = handleSubmit(async () => {
         <input class="form-control" type="number" name="phone" placeholder="Enter yout Mobile no" v-model="phone" />
         <span class="text-danger">{{ phoneError }}</span>
       </div>
-
       <div class="mb-3">
         <label>Email:</label>
         <input class="form-control" type="email" name="email" placeholder="Enter Your email" v-model="email" />
@@ -133,12 +133,10 @@ const submitForm = handleSubmit(async () => {
       <div class="mb-3">
         <label>Profile Image:</label>
         <!-- Use @change event listener for file inputs -->
-        <input class="form-control" type="file" name="profile" @change="handleFileChange"
-          accept="image/png, image/jpeg, image/jpg" />
+        <input class="form-control" type="file" name="profile" @change="handleFileChange" />
         <span class="text-danger">{{ profileError }}</span>
       </div>
       <div class="mb-3">
-
         <input class="form-control btn btn-primary" type="submit" value="AddUser" />
       </div>
     </form>

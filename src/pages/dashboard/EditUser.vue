@@ -18,7 +18,6 @@ const form = ref({
   email: '',
   profile: null,
 })
-const profilePreview = ref(null)
 const errors = ref({})
 
 const schema = yup.object({
@@ -26,37 +25,38 @@ const schema = yup.object({
   lastname: yup.string().required('Last name is required'),
   dob: yup.date().required('Date of birth is required').nullable(),
   gender: yup.string().required('Gender is required'),
-  phone: yup.string().matches(/^[0-9]{10}$/, 'Phone number is not valid').required('Phone number is required'),
+  phone: yup.string().matches(/^[0-9]{10}$/, 'Phone must be 10 digits').required('Phone number is required'),
   email: yup.string().email('Invalid email format').required('Email is required'),
-  profile_pic: yup
+  profile: yup
     .mixed()
-    .test('required', 'File is required', (value) => value !== null)
-    .test(
-      'filesize',
-      'File too large (max 2MB)',
-      (value) => !value || value.size <= 2 * 1024 * 1024,
-    )
-    .test('fileType', 'Unsupported File system', (value) => {
-      const AllowedType = ['image/png', 'image/jpeg', 'image/jpg'];
-
-      return !value || AllowedType.includes(value.type)
+    .nullable()
+    .test('fileType', 'Only PNG, JPG, JPEG allowed', (value) => {
+      if (!value) return true
+      const allowed = ['image/png', 'image/jpeg', 'image/jpg']
+      return allowed.includes(value.type)
+    })
+    .test('fileSize', 'Max size 2MB allowed', (value) => {
+      if (!value) return true
+      return value.size <= 2 * 1024 * 1024
     }),
 })
 
 async function fetchUser() {
   await store.getStudents()
   const user = store.users.find((s) => s.id == id)
-  if (user) {
-    form.value = { ...user, profile: null }
-    profilePreview.value = user.profile
+  if (!user) {
+    return
   }
+  form.value = { ...user, profile: null }
 }
-
-function handleFileChange(event) {
+async function handleFileChange(event) {
   const file = event.target.files[0]
-  if (file) {
-    form.value.profile = file
-    profilePreview.value = URL.createObjectURL(file)
+  form.value.profile = file
+  try {
+    await schema.validateAt('profile', form.value)
+    delete errors.value.profile
+  } catch (err) {
+    errors.value.profile = err.message
   }
 }
 
@@ -67,7 +67,7 @@ async function updateStudent() {
     errors.value = {}
 
     const formData = new FormData()
-    for (let key in form.value) {
+    for (const key in form.value) {
       if (form.value[key] !== null) {
         formData.append(key, form.value[key])
       }
@@ -127,11 +127,13 @@ onMounted(fetchUser)
         <div v-if="errors.email" class="text-danger">{{ errors.email }}</div>
       </div>
       <div class="mb-3">
-        <label>Profile Picture</label>
-        <input type="file" class="form-control mb-2" @change="handleFileChange" />
-        <div v-if="errors.profile" class="text-danger">{{ errors.profile }}</div>
+        <label>Profile Picture:</label>
+        <input type="file" class="form-control" @change="handleFileChange" />
+        <div v-if="errors.profile" class="text-danger mt-1">{{ errors.profile }}</div>
       </div>
-      <button type="submit" class="btn btn-success mt-3 w-100">Update Profile</button>
+
+      <button class="btn btn-success mt-3 w-100" type="submit">Update Profile</button>
+
     </form>
   </div>
 </template>
